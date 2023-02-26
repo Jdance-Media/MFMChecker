@@ -25,15 +25,35 @@ namespace MFMChecker
             stupidAssets.Add(47359);
             stupidAssets.Add(47357);
             stupidAssets.Add(47356);
+            List<RemovalQueue> removals = new List<RemovalQueue>();
             foreach (BarricadeRegion region in BarricadeManager.regions)
             {
                 foreach (BarricadeDrop drop in region.drops)
                 {
                     if (stupidAssets.Contains(drop.asset.id))
                     {
-                        region.drops.Remove(drop);
+                        removals.Add(new RemovalQueue(drop, region));
                     }
                 }
+            }
+
+            foreach (RemovalQueue removal in removals)
+            {
+                removal.Region.barricades.Remove(removal.Drop.GetServersideData());
+                removal.Region.drops.Remove(removal.Drop);
+            }
+            Level.onPostLevelLoaded -= onLoad;
+        }
+
+        public class RemovalQueue
+        {
+            public BarricadeDrop Drop { get; set; }
+            public BarricadeRegion Region { get; set; }
+
+            public RemovalQueue(BarricadeDrop drop, BarricadeRegion region)
+            {
+                Drop = drop;
+                Region = region;
             }
         }
     }
